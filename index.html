@@ -183,22 +183,32 @@ const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowe
    1) stesso principio attivo, forma diversa già idonea
    2) stessa classe ATC (3° livello: sottogruppo farmacologico), molecola
       diversa, con avviso esplicito che NON è una sostituzione automatica.   */
-const atc3 = a => (a && a.length >= 4) ? a.slice(0,4).toUpperCase() : null;
+const atcLvl = (a, n) => (a && a.length >= n) ? a.slice(0, n).toUpperCase() : null;
+const atc3 = a => atcLvl(a, 4);   // 3° livello: sottogruppo farmacologico (A02B)
+const atc4 = a => atcLvl(a, 5);   // 4° livello: sottogruppo chimico (A02BC)
 
 function trovaAlternative(r){
   if(r.s !== "rosso") return {stesso:[], classe:[]};
-  const pr = norm(r.p), r3 = atc3(r.atc);
-  const stesso = [], classe = [], formeViste = new Set(), molecoleViste = new Set();
+  const pr = norm(r.p), r3 = atc3(r.atc), r4 = atc4(r.atc);
+  const stesso = [], formeViste = new Set();
+  const perMolecola = new Map();   // una voce rappresentativa per molecola
   for(const v of voci){
     if(v.s !== "verde") continue;
     if(pr && norm(v.p) === pr){
       if(!formeViste.has(v.f)){ formeViste.add(v.f); stesso.push(v); }
     } else if(r3 && atc3(v.atc) === r3){
       const k = norm(v.p);
-      if(k && !molecoleViste.has(k)){ molecoleViste.add(k); classe.push(v); }
+      if(k && !perMolecola.has(k)) perMolecola.set(k, v);
     }
   }
-  return {stesso: stesso.slice(0,3), classe: classe.slice(0,3)};
+  // Ordina per vicinanza ATC: prima chi condivide il 4° livello (stessa
+  // famiglia/meccanismo), poi le altre molecole del 3° livello; poi per nome.
+  const classe = [...perMolecola.values()].sort((a, b) => {
+    const pa = (r4 && atc4(a.atc) === r4) ? 0 : 1;
+    const pb = (r4 && atc4(b.atc) === r4) ? 0 : 1;
+    return pa - pb || a.n.localeCompare(b.n);
+  });
+  return {stesso: stesso.slice(0,3), classe: classe.slice(0,4)};
 }
 
 function cerca(q){
