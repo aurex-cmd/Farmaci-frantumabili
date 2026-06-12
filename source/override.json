@@ -1,0 +1,37 @@
+{
+  "_istruzioni": "Le voci qui dentro hanno priorità assoluta sulle regole automatiche. Usale per i casi verificati a mano sull'RCP (Banca Dati Farmaci AIFA, sezioni 4.2 e 6.6). 'per_aic' vince su 'per_principio_attivo'. Stati ammessi: verde | giallo | rosso. Il campo 'alternativa' è facoltativo. VERIFICARE OGNI VOCE SULL'RCP PRIMA DELL'USO CLINICO: queste sono solo voci di esempio del formato.",
+
+  "per_principio_attivo": [
+    {
+      "principio_attivo": "apixaban",
+      "stato": "verde",
+      "motivo": "Frantumazione prevista dall'RCP (esempio di voce verificata)",
+      "nota": "DA VERIFICARE SULL'RCP PRIMA DELL'USO: l'RCP di apixaban descrive la triturazione e sospensione in acqua o glucosata, anche per sondino. Confermare sull'RCP della specialità in uso.",
+      "alternativa": ""
+    },
+    {
+      "principio_attivo": "lansoprazolo",
+      "stato": "giallo",
+      "motivo": "Capsule con microgranuli gastroresistenti",
+      "nota": "La capsula può essere aperta ma i granuli NON vanno triturati. DA VERIFICARE: esiste la formulazione orodispersibile, preferibile nel disfagico.",
+      "alternativa": "Formulazione orodispersibile dello stesso principio attivo"
+    },
+    {
+      "principio_attivo": "levodopa+carbidopa",
+      "stato": "giallo",
+      "motivo": "Frantumabilità dipendente dalla formulazione",
+      "nota": "Le forme standard sono in genere frantumabili, le forme a rilascio prolungato NO. Esiste formulazione dispersibile. Verificare la specialità esatta sull'RCP.",
+      "alternativa": "Formulazione dispersibile"
+    }
+  ],
+
+  "per_aic": [
+    {
+      "aic": "000000000",
+      "stato": "rosso",
+      "motivo": "Esempio di override su singola confezione (AIC)",
+      "nota": "Sostituire con un AIC reale: questa voce mostra solo il formato.",
+      "alternativa": ""
+    }
+  ]
+}

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FBF7F0">
+<title>Frantumabile? — Farmaci e disfagia</title>
+<style>
+  :root{
+    --carta:#FBF7F0; --inchiostro:#2B2620; --grigio:#7A7166;
+    --bordo:#E8E0D4; --campo:#FFFFFF;
+    --verde:#1E7A4C; --verde-fondo:#E6F4EC; --verde-bordo:#BBDEC9;
+    --giallo:#8A6400; --giallo-fondo:#FBF1D8; --giallo-bordo:#EBD9A4;
+    --rosso:#B3261E; --rosso-fondo:#FBE8E6; --rosso-bordo:#F0C2BE;
+    --raggio:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--carta); color:var(--inchiostro);
+    min-height:100vh; padding-bottom:40px;
+  }
+  .contenitore{max-width:560px;margin:0 auto;padding:0 16px}
+
+  header{padding:28px 0 4px}
+  h1{font-size:1.9rem;font-weight:800;letter-spacing:-.02em}
+  h1 .pillola{color:var(--verde)}
+  .sottotitolo{color:var(--grigio);font-size:.95rem;margin-top:4px}
+
+  .banner-demo{
+    margin-top:14px;background:var(--giallo-fondo);border:1.5px solid var(--giallo-bordo);
+    color:var(--giallo);border-radius:12px;padding:10px 14px;font-size:.85rem;font-weight:600;
+  }
+
+  .ricerca{position:sticky;top:0;background:var(--carta);padding:14px 0 10px;z-index:5}
+  .ricerca input{
+    width:100%;font-size:1.15rem;font-weight:600;color:var(--inchiostro);
+    padding:16px 18px;border:2px solid var(--bordo);border-radius:var(--raggio);
+    background:var(--campo);outline:none;
+  }
+  .ricerca input:focus{border-color:var(--inchiostro)}
+  .ricerca input::placeholder{color:#B8AFA2;font-weight:500}
+  .conta{color:var(--grigio);font-size:.8rem;margin-top:8px;padding-left:4px}
+
+  .vuoto{
+    text-align:center;color:var(--grigio);padding:48px 20px;font-size:.95rem;line-height:1.6;
+  }
+  .vuoto .icona{font-size:2.2rem;display:block;margin-bottom:10px}
+
+  .scheda{
+    background:var(--campo);border:1.5px solid var(--bordo);border-radius:var(--raggio);
+    margin-bottom:12px;overflow:hidden;cursor:pointer;
+    transition:border-color .15s;
+  }
+  .scheda:focus-visible{outline:3px solid var(--inchiostro);outline-offset:2px}
+  .scheda .testata{display:flex;align-items:stretch;gap:0}
+  .striscia{width:10px;flex:none}
+  .scheda.verde  .striscia{background:var(--verde)}
+  .scheda.giallo .striscia{background:var(--giallo)}
+  .scheda.rosso  .striscia{background:var(--rosso)}
+  .corpo{padding:14px 16px;flex:1;min-width:0}
+  .nome{font-size:1.12rem;font-weight:800;letter-spacing:-.01em}
+  .dettaglio{color:var(--grigio);font-size:.83rem;margin-top:3px;line-height:1.45}
+  .etichetta{
+    flex:none;align-self:center;margin-right:14px;
+    font-size:.72rem;font-weight:800;letter-spacing:.04em;
+    padding:6px 10px;border-radius:999px;white-space:nowrap;
+  }
+  .verde  .etichetta{background:var(--verde-fondo);color:var(--verde);border:1px solid var(--verde-bordo)}
+  .giallo .etichetta{background:var(--giallo-fondo);color:var(--giallo);border:1px solid var(--giallo-bordo)}
+  .rosso  .etichetta{background:var(--rosso-fondo);color:var(--rosso);border:1px solid var(--rosso-bordo)}
+
+  .verdetto{display:none;border-top:1.5px solid var(--bordo)}
+  .scheda.aperta .verdetto{display:block}
+  .verdetto-banda{
+    font-size:1.35rem;font-weight:900;letter-spacing:-.01em;
+    padding:14px 16px;text-align:center;
+  }
+  .verde  .verdetto-banda{background:var(--verde-fondo);color:var(--verde)}
+  .giallo .verdetto-banda{background:var(--giallo-fondo);color:var(--giallo)}
+  .rosso  .verdetto-banda{background:var(--rosso-fondo);color:var(--rosso)}
+  .verdetto-testo{padding:14px 16px;font-size:.92rem;line-height:1.55}
+  .verdetto-testo b{display:block;margin-bottom:4px}
+  .verdetto-testo .nota{color:var(--grigio);margin-top:8px}
+  .alternativa{
+    margin:0 16px 14px;padding:10px 12px;border-radius:12px;
+    background:var(--verde-fondo);border:1px solid var(--verde-bordo);
+    color:var(--verde);font-size:.88rem;font-weight:600;
+  }
+  .badge-rcp{
+    display:inline-block;margin-left:8px;font-size:.68rem;font-weight:800;
+    background:var(--inchiostro);color:var(--carta);
+    padding:3px 8px;border-radius:999px;vertical-align:middle;letter-spacing:.03em;
+  }
+
+  .alt-titolo{
+    padding:14px 16px 2px;font-size:.78rem;font-weight:800;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--grigio);border-top:1.5px dashed var(--bordo);
+  }
+  .alt-gruppo{padding:8px 16px 4px}
+  .alt-etichetta{
+    display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.02em;
+    padding:4px 9px;border-radius:999px;margin-bottom:8px;
+  }
+  .alt-etichetta.verde{background:var(--verde-fondo);color:var(--verde);border:1px solid var(--verde-bordo)}
+  .alt-etichetta.classe{background:var(--giallo-fondo);color:var(--giallo);border:1px solid var(--giallo-bordo)}
+  .alt-voce{
+    display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+    padding:7px 10px;background:var(--verde-fondo);border:1px solid var(--verde-bordo);
+    border-radius:10px;margin-bottom:6px;
+  }
+  .alt-nome{font-weight:800;font-size:.92rem;color:var(--verde)}
+  .alt-forma{font-size:.78rem;color:var(--grigio);text-align:right}
+  .alt-avviso{
+    font-size:.78rem;line-height:1.45;color:var(--giallo);
+    background:var(--giallo-fondo);border:1px solid var(--giallo-bordo);
+    border-radius:10px;padding:8px 10px;margin-top:4px;
+  }
+  .alt-vuoto{
+    padding:12px 16px 16px;font-size:.83rem;line-height:1.5;color:var(--grigio);
+    border-top:1.5px dashed var(--bordo);
+  }
+
+  footer{
+    margin-top:28px;color:var(--grigio);font-size:.78rem;line-height:1.6;
+    border-top:1.5px solid var(--bordo);padding-top:16px;
+  }
+</style>
+</head>
+<body>
+<div class="contenitore">
+  <header>
+    <h1>Frantumabile<span class="pillola">?</span></h1>
+    <p class="sottotitolo">Idoneità dei farmaci orali alla frantumazione nel paziente disfagico. <b>Verde solo se confermato da RCP/forma</b>; in tutti gli altri casi verificare l'RCP.</p>
+    <div class="banner-demo" id="bannerDemo" hidden>
+      Dataset dimostrativo (poche voci di esempio). Genera <b>farmaci.json</b> con lo script per l'elenco completo AIFA.
+    </div>
+  </header>
+
+  <div class="ricerca">
+    <input id="campo" type="search" placeholder="Cerca per nome commerciale o principio attivo…"
+           autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Cerca farmaco">
+    <div class="conta" id="conta"></div>
+  </div>
+
+  <div id="risultati"></div>
+
+  <footer>
+    <b>Strumento di supporto per uso professionale.</b> La classificazione è generata in parte con regole
+    automatiche sulla forma farmaceutica: in caso di dubbio fa fede l'RCP della specialità
+    (Banca Dati Farmaci AIFA, sezioni 4.2 e 6.6) e il parere del farmacista. Non sostituisce il giudizio clinico.
+    Verificare sempre la compatibilità con la consistenza prescritta per il grado di disfagia del paziente.
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* ----- Dataset dimostrativo: sostituito da farmaci.json se presente ----- */
+const DEMO = [
+ {n:"ZYPREXA VELOTAB",p:"OLANZAPINA",f:"28 CPR ORODISPERS 5 MG",atc:"N05AH03",s:"verde",m:"Forma orodispersibile",x:"Si dissolve in bocca: idonea al paziente disfagico senza frantumazione. Verificare la consistenza adatta al grado di disfagia."},
+ {n:"EN",p:"DELORAZEPAM",f:"20 ML OS GTT 1MG/ML",atc:"N05BA08",s:"verde",m:"Forma liquida/dispersibile",x:"Somministrabile senza frantumare. ATTENZIONE: i liquidi fluidi possono richiedere addensante nel disfagico (rischio di aspirazione)."},
+ {n:"AULIN",p:"NIMESULIDE",f:"30 BUST GRAT 100 MG",atc:"M01AX17",s:"verde",m:"Forma liquida/dispersibile",x:"Granulato per sospensione orale: somministrabile senza frantumare. Adeguare la consistenza al grado di disfagia."},
+ {n:"ELIQUIS",p:"APIXABAN",f:"60 CPR RIV 5 MG",atc:"B01AF02",s:"verde",m:"Frantumazione confermata dall'RCP",x:"VOCE VERIFICATA SU RCP (override): l'RCP descrive la triturazione e sospensione in acqua, anche per sondino. Confermare sulla specialità in uso.",v:1},
+ {n:"LANSOPRAZOLO ORODISP",p:"LANSOPRAZOLO",f:"14 CPR ORODISPERS 30 MG",atc:"A02BC03",s:"verde",m:"Forma orodispersibile",x:"Si dissolve in bocca: idonea al paziente disfagico senza frantumazione."},
+ {n:"LEVETIRACETAM SOL",p:"LEVETIRACETAM",f:"300 ML SOLUZ ORALE 100MG/ML",atc:"N03AX14",s:"verde",m:"Forma liquida/dispersibile",x:"Soluzione orale: somministrabile senza frantumare. Adeguare la consistenza al grado di disfagia."},
+ {n:"TACHIPIRINA",p:"PARACETAMOLO",f:"20 CPR 500 MG",atc:"N02BE01",s:"rosso",m:"Compressa — frantumabilità non confermata dall'RCP",x:"Non confermata dai dati di anagrafica. Verificare l'RCP (sez. 4.2 e 6.6): se conferma la triturabilità, aggiungere a override per portarla a verde."},
+ {n:"PANTORC",p:"PANTOPRAZOLO",f:"14 CPR GASTRORES 40 MG",atc:"A02BC02",s:"rosso",m:"Forma gastroresistente",x:"Non frantumare mai: la triturazione distrugge il rivestimento enterico (inattivazione del farmaco o lesione gastrica)."},
+ {n:"OMEPRAZOLO EG",p:"OMEPRAZOLO",f:"14 CPS GASTRORES 20 MG",atc:"A02BC01",s:"rosso",m:"Forma gastroresistente",x:"Non frantumare mai: la triturazione distrugge il rivestimento enterico."},
+ {n:"MS CONTIN",p:"MORFINA SOLFATO",f:"16 CPR RP 10 MG",atc:"N02AA01",s:"rosso",m:"Rilascio prolungato/modificato",x:"Non frantumare mai: rischio di dose dumping (rilascio immediato dell'intera dose) e tossicità."},
+ {n:"DEPAKIN",p:"ACIDO VALPROICO",f:"30 CPR GASTRORES 200 MG",atc:"N03AG01",s:"rosso",m:"Forma gastroresistente",x:"Non frantumare mai: la triturazione distrugge il rivestimento enterico."},
+ {n:"PROSCAR",p:"FINASTERIDE",f:"15 CPR RIV 5 MG",atc:"G04CB01",s:"rosso",m:"Principio attivo a rischio per l'operatore",x:"Non frantumare mai: rischio di esposizione per chi prepara (teratogeno)."},
+ {n:"NITROGLICERINA",p:"NITROGLICERINA",f:"30 CPR SUBL 0,3 MG",atc:"C01DA02",s:"rosso",m:"Forma sublinguale/buccale",x:"Non frantumare: la via sublinguale è spesso già praticabile nel disfagico. Verificare l'RCP."}
+];
+
+const VERDETTI = {verde:"IDONEO", giallo:"VERIFICARE RCP", rosso:"NON IDONEO"};
+let voci = DEMO, demo = true;
+
+/* ----- Normalizzazione e ricerca ----- */
+const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+
+/* ----- Alternative idonee per i farmaci rossi -----
+   1) stesso principio attivo, forma diversa già idonea
+   2) stessa classe ATC (3° livello: sottogruppo farmacologico), molecola
+      diversa, con avviso esplicito che NON è una sostituzione automatica.   */
+const atc3 = a => (a && a.length >= 4) ? a.slice(0,4).toUpperCase() : null;
+
+function trovaAlternative(r){
+  if(r.s !== "rosso") return {stesso:[], classe:[]};
+  const pr = norm(r.p), r3 = atc3(r.atc);
+  const stesso = [], classe = [], formeViste = new Set(), molecoleViste = new Set();
+  for(const v of voci){
+    if(v.s !== "verde") continue;
+    if(pr && norm(v.p) === pr){
+      if(!formeViste.has(v.f)){ formeViste.add(v.f); stesso.push(v); }
+    } else if(r3 && atc3(v.atc) === r3){
+      const k = norm(v.p);
+      if(k && !molecoleViste.has(k)){ molecoleViste.add(k); classe.push(v); }
+    }
+  }
+  return {stesso: stesso.slice(0,3), classe: classe.slice(0,3)};
+}
+
+function cerca(q){
+  q = norm(q).trim();
+  if(q.length < 2) return [];
+  const punteggi = [];
+  for(const v of voci){
+    const nome = norm(v.n), pa = norm(v.p);
+    let s = -1;
+    if(nome.startsWith(q)) s = 0;
+    else if(nome.split(/\s+/).some(w => w.startsWith(q))) s = 1;
+    else if(pa.startsWith(q)) s = 2;
+    else if(nome.includes(q)) s = 3;
+    else if(pa.includes(q)) s = 4;
+    if(s >= 0) punteggi.push([s, v]);
+  }
+  punteggi.sort((a,b) => a[0]-b[0] || a[1].n.localeCompare(b[1].n));
+  return punteggi.slice(0,60).map(x => x[1]);
+}
+
+/* ----- Rendering ----- */
+const esc = s => (s||"").replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function bloccoAlternative(v){
+  if(v.s !== "rosso") return "";
+  const alt = trovaAlternative(v);
+  if(!alt.stesso.length && !alt.classe.length){
+    return `<div class="alt-vuoto">Nessuna alternativa idonea trovata in archivio.</div>`;
+  }
+  let html = `<div class="alt-titolo">Alternative idonee</div>`;
+  if(alt.stesso.length){
+    html += `<div class="alt-gruppo"><div class="alt-etichetta verde">Stesso principio attivo</div>`;
+    html += alt.stesso.map(a =>
+      `<div class="alt-voce"><span class="alt-nome">${esc(a.n)}</span><span class="alt-forma">${esc(a.f)}</span></div>`).join("");
+    html += `</div>`;
+  }
+  if(alt.classe.length){
+    html += `<div class="alt-gruppo"><div class="alt-etichetta classe">Stessa classe ATC — valutazione medica</div>`;
+    html += alt.classe.map(a =>
+      `<div class="alt-voce"><span class="alt-nome">${esc(a.n)}</span><span class="alt-forma">${esc(a.p)} · ${esc(a.f)}</span></div>`).join("");
+    html += `<div class="alt-avviso">Non è una sostituzione automatica. Le molecole della stessa classe ATC non sono equivalenti: la scelta spetta al medico, verificando dose, indicazione, interazioni e controindicazioni.</div></div>`;
+  }
+  return html;
+}
+
+function scheda(v){
+  return `<div class="scheda ${v.s}" tabindex="0" role="button" aria-expanded="false">
+    <div class="testata">
+      <div class="striscia"></div>
+      <div class="corpo">
+        <div class="nome">${esc(v.n)}${v.v ? '<span class="badge-rcp">RCP ✓</span>' : ''}</div>
+        <div class="dettaglio">${esc(v.p)}<br>${esc(v.f)}</div>
+      </div>
+      <span class="etichetta">${VERDETTI[v.s]}</span>
+    </div>
+    <div class="verdetto">
+      <div class="verdetto-banda">${VERDETTI[v.s]}</div>
+      <div class="verdetto-testo">
+        <b>${esc(v.m)}</b>
+        <div class="nota">${esc(v.x)}</div>
+      </div>
+      ${v.alt ? `<div class="alternativa">Alternativa: ${esc(v.alt)}</div>` : ''}
+      ${bloccoAlternative(v)}
+    </div>
+  </div>`;
+}
+
+const campo = document.getElementById("campo");
+const risultati = document.getElementById("risultati");
+const conta = document.getElementById("conta");
+
+function mostraVuoto(msg, icona){
+  risultati.innerHTML = `<div class="vuoto"><span class="icona">${icona}</span>${msg}</div>`;
+}
+
+function aggiorna(){
+  const q = campo.value;
+  if(norm(q).trim().length < 2){
+    conta.textContent = "";
+    mostraVuoto("Digita almeno due lettere del nome commerciale<br>o del principio attivo.","💊");
+    return;
+  }
+  const r = cerca(q);
+  conta.textContent = r.length ? `${r.length} risultat${r.length===1?"o":"i"}${r.length===60?" (mostrati i primi 60)":""}` : "";
+  if(!r.length){
+    mostraVuoto("Nessun farmaco trovato.<br>Controlla l'ortografia o prova con il principio attivo.","🔍");
+    return;
+  }
+  risultati.innerHTML = r.map(scheda).join("");
+}
+
+let timer;
+campo.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(aggiorna, 120); });
+
+risultati.addEventListener("click", e => {
+  const s = e.target.closest(".scheda");
+  if(s){ s.classList.toggle("aperta"); s.setAttribute("aria-expanded", s.classList.contains("aperta")); }
+});
+risultati.addEventListener("keydown", e => {
+  if((e.key === "Enter" || e.key === " ") && e.target.classList.contains("scheda")){
+    e.preventDefault(); e.target.click();
+  }
+});
+
+/* ----- Caricamento del database reale, se presente ----- */
+fetch("farmaci.json")
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(d => { if(d && d.voci && d.voci.length){ voci = d.voci; demo = false; } })
+  .catch(() => {})
+  .finally(() => {
+    document.getElementById("bannerDemo").hidden = !demo;
+    aggiorna();
+  });
+</script>
+</body>
+</html>
