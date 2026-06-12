@@ -179,6 +179,24 @@ let voci = DEMO, demo = true;
 /* ----- Normalizzazione e ricerca ----- */
 const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 
+/* ----- Sinonimi dei principi attivi -----
+   Lega le due nomenclature italiane "acido X-ico" <-> "X-ato"
+   (es. acido alendronico <-> alendronato, acido valproico <-> valproato),
+   così la ricerca trova un farmaco indipendentemente da come è denominato. */
+function generaSinonimi(p){
+  const t = new Set();
+  let m;
+  const reAcido = /acido\s+([a-z]{3,})ico\b/g;
+  while((m = reAcido.exec(p))) t.add(m[1] + "ato");
+  const reAto = /\b([a-z]{4,})ato\b/g;
+  while((m = reAto.exec(p))) t.add("acido " + m[1] + "ico");
+  return [...t].join(" ");
+}
+function preparaIndice(arr){
+  for(const v of arr) v._syn = " " + generaSinonimi(norm(v.p)) + " ";
+}
+preparaIndice(voci);
+
 /* ----- Alternative idonee per i farmaci rossi -----
    1) stesso principio attivo, forma diversa già idonea
    2) stessa classe ATC (3° livello: sottogruppo farmacologico), molecola
@@ -216,13 +234,13 @@ function cerca(q){
   if(q.length < 2) return [];
   const punteggi = [];
   for(const v of voci){
-    const nome = norm(v.n), pa = norm(v.p);
-    let s = -1;
-    if(nome.startsWith(q)) s = 0;
-    else if(nome.split(/\s+/).some(w => w.startsWith(q))) s = 1;
-    else if(pa.startsWith(q)) s = 2;
-    else if(nome.includes(q)) s = 3;
-    else if(pa.includes(q)) s = 4;
+    const nome = norm(v.n), pa = norm(v.p), syn = v._syn || "";
+    const prefisso =
+      nome.startsWith(q) || nome.split(/\s+/).some(w => w.startsWith(q)) ||
+      pa.startsWith(q)   || pa.split(/\s+/).some(w => w.startsWith(q))   ||
+      syn.includes(" " + q);
+    const sottostringa = nome.includes(q) || pa.includes(q) || syn.includes(q);
+    const s = prefisso ? 0 : (sottostringa ? 1 : -1);
     if(s >= 0) punteggi.push([s, v]);
   }
   const rangoStato = {verde:0, giallo:1, rosso:2};
@@ -321,7 +339,7 @@ risultati.addEventListener("keydown", e => {
 /* ----- Caricamento del database reale, se presente ----- */
 fetch("farmaci.json")
   .then(r => r.ok ? r.json() : Promise.reject())
-  .then(d => { if(d && d.voci && d.voci.length){ voci = d.voci; demo = false; } })
+  .then(d => { if(d && d.voci && d.voci.length){ voci = d.voci; demo = false; preparaIndice(voci); } })
   .catch(() => {})
   .finally(() => {
     document.getElementById("bannerDemo").hidden = !demo;
