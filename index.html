@@ -215,7 +215,11 @@ function cerca(q){
     else if(pa.includes(q)) s = 4;
     if(s >= 0) punteggi.push([s, v]);
   }
-  punteggi.sort((a,b) => a[0]-b[0] || a[1].n.localeCompare(b[1].n));
+  const rangoStato = {verde:0, giallo:1, rosso:2};
+  punteggi.sort((a,b) =>
+    a[0]-b[0] ||
+    (rangoStato[a[1].s] - rangoStato[b[1].s]) ||
+    a[1].n.localeCompare(b[1].n));
   return punteggi.slice(0,60).map(x => x[1]);
 }
 
