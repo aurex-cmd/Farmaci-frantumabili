@@ -205,22 +205,32 @@ const atcLvl = (a, n) => (a && a.length >= n) ? a.slice(0, n).toUpperCase() : nu
 const atc3 = a => atcLvl(a, 4);   // 3° livello: sottogruppo farmacologico (A02B)
 const atc4 = a => atcLvl(a, 5);   // 4° livello: sottogruppo chimico (A02BC)
 
+/* Alcuni sottogruppi di 3° livello sono troppo eterogenei per essere trattati
+   come un'unica "classe": vi convivono categorie non intercambiabili. Per questi
+   la classe usata per le alternative è il 4° livello.
+   - B01A: separa anticoagulanti (B01AA/B01AE/B01AF...) e antiaggreganti (B01AC). */
+const RICHIEDE_L4 = new Set(["B01A"]);
+const chiaveClasse = a => {
+  const l3 = atc3(a);
+  return (l3 && RICHIEDE_L4.has(l3)) ? atc4(a) : l3;
+};
+
 function trovaAlternative(r){
   if(r.s !== "rosso") return {stesso:[], classe:[]};
-  const pr = norm(r.p), r3 = atc3(r.atc), r4 = atc4(r.atc);
+  const pr = norm(r.p), rKey = chiaveClasse(r.atc), r4 = atc4(r.atc);
   const stesso = [], formeViste = new Set();
   const perMolecola = new Map();   // una voce rappresentativa per molecola
   for(const v of voci){
     if(v.s !== "verde") continue;
     if(pr && norm(v.p) === pr){
       if(!formeViste.has(v.f)){ formeViste.add(v.f); stesso.push(v); }
-    } else if(r3 && atc3(v.atc) === r3){
+    } else if(rKey && chiaveClasse(v.atc) === rKey){
       const k = norm(v.p);
       if(k && !perMolecola.has(k)) perMolecola.set(k, v);
     }
   }
   // Ordina per vicinanza ATC: prima chi condivide il 4° livello (stessa
-  // famiglia/meccanismo), poi le altre molecole del 3° livello; poi per nome.
+  // famiglia/meccanismo), poi le altre molecole; poi per nome.
   const classe = [...perMolecola.values()].sort((a, b) => {
     const pa = (r4 && atc4(a.atc) === r4) ? 0 : 1;
     const pb = (r4 && atc4(b.atc) === r4) ? 0 : 1;
