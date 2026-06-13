@@ -205,14 +205,13 @@ const atcLvl = (a, n) => (a && a.length >= n) ? a.slice(0, n).toUpperCase() : nu
 const atc3 = a => atcLvl(a, 4);   // 3° livello: sottogruppo farmacologico (A02B)
 const atc4 = a => atcLvl(a, 5);   // 4° livello: sottogruppo chimico (A02BC)
 
-/* Alcuni sottogruppi di 3° livello sono troppo eterogenei per essere trattati
-   come un'unica "classe": vi convivono categorie non intercambiabili. Per questi
-   la classe usata per le alternative è il 4° livello.
-   - B01A: separa anticoagulanti (B01AA/B01AE/B01AF...) e antiaggreganti (B01AC). */
-const RICHIEDE_L4 = new Set(["B01A"]);
+/* Alcuni sottogruppi di 3° livello mescolano categorie non intercambiabili.
+   B01A (antitrombotici) ne è il caso tipico: gli anticoagulanti (B01AA, B01AB,
+   B01AE, B01AF...) vanno tenuti insieme ma separati dagli antiaggreganti (B01AC). */
 const chiaveClasse = a => {
   const l3 = atc3(a);
-  return (l3 && RICHIEDE_L4.has(l3)) ? atc4(a) : l3;
+  if(l3 === "B01A") return atc4(a) === "B01AC" ? "B01A-ANTIAGG" : "B01A-ANTICOAG";
+  return l3;
 };
 
 function trovaAlternative(r){
@@ -281,7 +280,7 @@ function bloccoAlternative(v){
   if(alt.classe.length){
     html += `<div class="alt-gruppo"><div class="alt-etichetta classe">Stessa classe ATC — valutazione medica</div>`;
     html += alt.classe.map(a =>
-      `<div class="alt-voce"><span class="alt-nome">${esc(a.n)}</span><span class="alt-forma">${esc(a.p)} · ${esc(a.f)}</span></div>`).join("");
+      `<div class="alt-voce"><span class="alt-nome">${esc(a.p)}</span><span class="alt-forma">${esc(a.f)}</span></div>`).join("");
     html += `<div class="alt-avviso">Non è una sostituzione automatica. Le molecole della stessa classe ATC non sono equivalenti: la scelta spetta al medico, verificando dose, indicazione, interazioni e controindicazioni.</div></div>`;
   }
   return html;
