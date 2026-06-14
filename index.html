@@ -4,9 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#FBF7F0">
+<meta name="color-scheme" content="light">
 <title>Frantumabile? — Farmaci e disfagia</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Frantumabile">
+<meta name="description" content="Idoneità dei farmaci orali alla frantumazione nel paziente disfagico">
 <style>
   :root{
+    color-scheme: light;
     --carta:#FBF7F0; --inchiostro:#2B2620; --grigio:#7A7166;
     --bordo:#E8E0D4; --campo:#FFFFFF;
     --verde:#1E7A4C; --verde-fondo:#E6F4EC; --verde-bordo:#BBDEC9;
@@ -15,6 +25,7 @@
     --raggio:18px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--carta)}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     background:var(--carta); color:var(--inchiostro);
@@ -125,6 +136,11 @@
     margin-top:28px;color:var(--grigio);font-size:.78rem;line-height:1.6;
     border-top:1.5px solid var(--bordo);padding-top:16px;
   }
+  .crediti{
+    margin-top:14px;text-align:center;color:var(--grigio);
+    font-size:.74rem;line-height:1.5;font-style:italic;
+  }
+  .crediti b{font-style:normal;font-weight:700;color:var(--inchiostro)}
 </style>
 </head>
 <body>
@@ -151,6 +167,10 @@
     (Banca Dati Farmaci AIFA, sezioni 4.2 e 6.6) e il parere del farmacista. Non sostituisce il giudizio clinico.
     Verificare sempre la compatibilità con la consistenza prescritta per il grado di disfagia del paziente.
   </footer>
+
+  <p class="crediti">
+    Creato dal <b>Dr. Aurelio Guarnaccia</b>, in collaborazione e su un'idea della <b>Dr.ssa Cristina Benetazzo</b>.
+  </p>
 </div>
 
 <script>
@@ -354,6 +374,13 @@ fetch("farmaci.json")
     document.getElementById("bannerDemo").hidden = !demo;
     aggiorna();
   });
+
+/* Registrazione del service worker (rende l'app installabile e disponibile offline) */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
